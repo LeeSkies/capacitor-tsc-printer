@@ -226,14 +226,10 @@ public class TscPrinterCore {
         byte[] encoded_data = encode.LZSSEncoding(stream, stream.length);
         stream = null;
         ByteArrayOutputStream out = new ByteArrayOutputStream();
-        try {
-            out.write(header, 0, header.length);
-            out.write(encoded_data, 0, encoded_data.length);
-            out.write("\r\n".getBytes(), 0, 2);
-            sendcommand(out.toByteArray());
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
+        out.write(header, 0, header.length);
+        out.write(encoded_data, 0, encoded_data.length);
+        out.write("\r\n".getBytes(), 0, 2);
+        sendcommand(out.toByteArray());
         header = null;
         encoded_data = null;
     }
