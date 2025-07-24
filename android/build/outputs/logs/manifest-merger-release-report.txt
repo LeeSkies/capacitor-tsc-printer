@@ -1,0 +1,33 @@
+-- Merging decision tree log ---
+manifest
+ADDED from /home/lee/Documents/work/fabios-mobile/node_modules/capacitor-tsc-printer/android/src/main/AndroidManifest.xml:1:1-4:12
+INJECTED from /home/lee/Documents/work/fabios-mobile/node_modules/capacitor-tsc-printer/android/src/main/AndroidManifest.xml:1:1-4:12
+INJECTED from /home/lee/Documents/work/fabios-mobile/node_modules/capacitor-tsc-printer/android/src/main/AndroidManifest.xml:1:1-4:12
+	package
+		INJECTED from /home/lee/Documents/work/fabios-mobile/node_modules/capacitor-tsc-printer/android/src/main/AndroidManifest.xml
+		ADDED from /home/lee/Documents/work/fabios-mobile/node_modules/capacitor-tsc-printer/android/src/main/AndroidManifest.xml:1:1-4:12
+		INJECTED from /home/lee/Documents/work/fabios-mobile/node_modules/capacitor-tsc-printer/android/src/main/AndroidManifest.xml
+	xmlns:android
+		ADDED from /home/lee/Documents/work/fabios-mobile/node_modules/capacitor-tsc-printer/android/src/main/AndroidManifest.xml:1:11-69
+uses-permission#android.permission.INTERNET
+ADDED from /home/lee/Documents/work/fabios-mobile/node_modules/capacitor-tsc-printer/android/src/main/AndroidManifest.xml:2:5-66
+	android:name
+		ADDED from /home/lee/Documents/work/fabios-mobile/node_modules/capacitor-tsc-printer/android/src/main/AndroidManifest.xml:2:22-64
+uses-permission#android.permission.WRITE_EXTERNAL_STORAGE
+ADDED from /home/lee/Documents/work/fabios-mobile/node_modules/capacitor-tsc-printer/android/src/main/AndroidManifest.xml:3:5-80
+	android:name
+		ADDED from /home/lee/Documents/work/fabios-mobile/node_modules/capacitor-tsc-printer/android/src/main/AndroidManifest.xml:3:22-78
+uses-sdk
+INJECTED from /home/lee/Documents/work/fabios-mobile/node_modules/capacitor-tsc-printer/android/src/main/AndroidManifest.xml reason: use-sdk injection requested
+INJECTED from /home/lee/Documents/work/fabios-mobile/node_modules/capacitor-tsc-printer/android/src/main/AndroidManifest.xml
+INJECTED from /home/lee/Documents/work/fabios-mobile/node_modules/capacitor-tsc-printer/android/src/main/AndroidManifest.xml
+INJECTED from /home/lee/Documents/work/fabios-mobile/node_modules/capacitor-tsc-printer/android/src/main/AndroidManifest.xml
+INJECTED from /home/lee/Documents/work/fabios-mobile/node_modules/capacitor-tsc-printer/android/src/main/AndroidManifest.xml
+	android:targetSdkVersion
+		INJECTED from /home/lee/Documents/work/fabios-mobile/node_modules/capacitor-tsc-printer/android/src/main/AndroidManifest.xml
+		ADDED from /home/lee/Documents/work/fabios-mobile/node_modules/capacitor-tsc-printer/android/src/main/AndroidManifest.xml
+		INJECTED from /home/lee/Documents/work/fabios-mobile/node_modules/capacitor-tsc-printer/android/src/main/AndroidManifest.xml
+	android:minSdkVersion
+		INJECTED from /home/lee/Documents/work/fabios-mobile/node_modules/capacitor-tsc-printer/android/src/main/AndroidManifest.xml
+		ADDED from /home/lee/Documents/work/fabios-mobile/node_modules/capacitor-tsc-printer/android/src/main/AndroidManifest.xml
+		INJECTED from /home/lee/Documents/work/fabios-mobile/node_modules/capacitor-tsc-printer/android/src/main/AndroidManifest.xml
