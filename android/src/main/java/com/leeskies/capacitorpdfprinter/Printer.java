@@ -17,9 +17,7 @@ public class Printer {
         boolean connectionOpened = false;
         try {
             String result = tsc.openport(IPAddress, port);
-            call.reject(result);
-            return;
-            if (result == null || result.equals("-1") || result.toLowerCase().contains("error")) {
+            if (result == null || result.equals("-1") || result.toLowerCase().contains("error") || result.toLowerCase().contains("failed")) {
                 call.reject("Failed to connect to printer at " + IPAddress + ":" + port + " - " + result);
                 return;
             }
@@ -49,9 +47,7 @@ public class Printer {
         boolean connectionOpened = false;
         try {
             String openResult = tsc.openport(IPAddress, port);
-            call.reject(result);
-            return;
-            if (openResult == null || openResult.equals("-1") || openResult.toLowerCase().contains("error")) {
+            if (openResult == null || openResult.equals("-1") || openResult.toLowerCase().contains("error") || openResult.toLowerCase().contains("failed")) {
                 call.reject("Failed to connect to printer at " + IPAddress + ":" + port + " - " + openResult);
                 return;
             }
@@ -100,9 +96,7 @@ public class Printer {
         boolean connectionOpened = false;
         try {
             String openResult = tsc.openport(IPAddress, port);
-            call.reject(result);
-            return;
-            if (openResult == null || openResult.equals("-1") || openResult.toLowerCase().contains("error")) {
+            if (openResult == null || openResult.equals("-1") || openResult.toLowerCase().contains("error") || openResult.toLowerCase().contains("failed")) {
                 call.reject("Failed to connect to printer at " + IPAddress + ":" + port + " - " + openResult);
                 return;
             }
