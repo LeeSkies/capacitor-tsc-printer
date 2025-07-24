@@ -3,7 +3,7 @@ package com.leeskies.capacitorpdfprinter;
 import android.content.Context;
 import android.util.Log;
 
-import com.example.tscdll.TscWifiActivity;
+import com.leeskies.capacitorpdfprinter.TscPrinterCore;
 
 import java.io.File;
 import java.io.FileOutputStream;
@@ -15,7 +15,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
 
 public class Printer {
     public void print(int port, String IPAddress, String uri, PluginCall call) {
-        TscWifiActivity tsc = new TscWifiActivity();
+        TscPrinterCore tsc = new TscPrinterCore();
         boolean connectionOpened = false;
         try {
             String result = tsc.openport(IPAddress, port);
@@ -25,7 +25,8 @@ public class Printer {
             }
             connectionOpened = true;
             
-            String flag = tsc.printPDFbyPath(uri, 0, 100, 300);
+            File pdfFile = new File(uri);
+            String flag = tsc.printPDFbyFile(pdfFile, 0, 100, 300);
             if (flag.equals("-1")) {
                 call.reject("Print operation failed");
                 return;
@@ -37,7 +38,7 @@ public class Printer {
             if (connectionOpened) {
                 try {
                     tsc.clearbuffer();
-                    tsc.closeport(port);
+                    tsc.closeport(1000);
                 } catch (Exception e) {
                     Log.d("Printer", "Error during cleanup: " + e.getMessage());
                 }
@@ -49,7 +50,7 @@ public class Printer {
         new Thread(new Runnable() {
             @Override
             public void run() {
-                TscWifiActivity tsc = new TscWifiActivity();
+                TscPrinterCore tsc = new TscPrinterCore();
                 boolean connectionOpened = false;
                 try {
                     String openResult = tsc.openport(IPAddress, port);
@@ -90,7 +91,7 @@ public class Printer {
                     if (connectionOpened) {
                         try {
                             tsc.clearbuffer();
-                            tsc.closeport(port);
+                            tsc.closeport(1000);
                         } catch (Exception e) {
                             Log.d("Printer", "Error during cleanup: " + e.getMessage());
                         }
@@ -104,7 +105,7 @@ public class Printer {
         new Thread(new Runnable() {
             @Override
             public void run() {
-                TscWifiActivity tsc = new TscWifiActivity();
+                TscPrinterCore tsc = new TscPrinterCore();
                 AtomicBoolean connectionOpened = new AtomicBoolean(false);
 
                 try {
@@ -153,7 +154,7 @@ public class Printer {
                     if (connectionOpened.get()) {
                         try {
                             tsc.clearbuffer();
-                            tsc.closeport(port);
+                            tsc.closeport(1000);
                         } catch (Exception e) {
                             Log.d("Printer", "Error during cleanup: " + e.getMessage());
                         }
