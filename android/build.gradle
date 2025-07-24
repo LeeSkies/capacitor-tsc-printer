@@ -59,8 +59,8 @@ repositories {
 }
 
 dependencies {
-    implementation fileTree(dir: 'libs', include: ['*.jar'], exclude: ['tscsdk.jar'])
-    // implementation files("libs/tscsdk.jar")
+    implementation fileTree(dir: 'libs', include: ['*.jar'])
+    implementation files("libs/tscsdk.jar")
     implementation project(':capacitor-android')
     implementation "androidx.appcompat:appcompat:$androidxAppCompatVersion"
     testImplementation "junit:junit:$junitVersion"
