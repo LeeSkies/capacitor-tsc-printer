@@ -99,6 +99,13 @@ public class Printer {
                         }
                         Log.d("Printer", "Created temp PDF file: " + tempFile.getAbsolutePath() + " (" + tempFile.length() + " bytes)");
                         
+                        // Save a copy to Downloads for debugging
+                        File debugFile = new File(android.os.Environment.getExternalStoragePublicDirectory(android.os.Environment.DIRECTORY_DOWNLOADS), "debug_pdf_" + System.currentTimeMillis() + ".pdf");
+                        try (FileOutputStream debugFos = new FileOutputStream(debugFile)) {
+                            debugFos.write(pdfBytes);
+                        }
+                        Log.d("Printer", "Debug PDF saved to: " + debugFile.getAbsolutePath());
+                        
                         Log.d("Printer", "Starting print operation with params: x=" + x + ", y=" + y + ", dpi=" + dpi);
                         String result = tsc.printPDFbyFile(tempFile, x, y, dpi);
                         Log.d("Printer", "Print operation result: " + result);
@@ -183,6 +190,13 @@ public class Printer {
                             fos.write(pdfBytes);
                         }
                         Log.d("Printer", "Created temp PDF file: " + tempFile.getAbsolutePath() + " (" + tempFile.length() + " bytes)");
+                        
+                        // Save a copy to Downloads for debugging
+                        File debugFile = new File(android.os.Environment.getExternalStoragePublicDirectory(android.os.Environment.DIRECTORY_DOWNLOADS), "debug_pdf_" + System.currentTimeMillis() + ".pdf");
+                        try (FileOutputStream debugFos = new FileOutputStream(debugFile)) {
+                            debugFos.write(pdfBytes);
+                        }
+                        Log.d("Printer", "Debug PDF saved to: " + debugFile.getAbsolutePath());
                         
                         Log.d("Printer", "Starting print operation with params: x=" + x + ", y=" + y + ", dpi=" + dpi);
                         String result = tsc.printPDFbyFile(tempFile, x, y, dpi);
