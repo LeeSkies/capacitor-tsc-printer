@@ -182,7 +182,7 @@ public class TscPrinterCore {
                 int width = (int)((page.getWidth() * printer_dpi) / 72.0D);
                 int height = (int)((page.getHeight() * printer_dpi) / 72.0D);
                 Bitmap bitmap = Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888);
-                page.render(bitmap, null, null, 1);
+                page.render(bitmap, new Rect(0, 0, width, height), null, 1);
                 page.close();
                 sendcommand("CLS\r\n");
                 sendBitmapManually(x_coordinates, y_coordinates, bitmap);
