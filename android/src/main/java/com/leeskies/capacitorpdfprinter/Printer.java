@@ -97,7 +97,17 @@ public class Printer {
                         try (FileOutputStream fos = new FileOutputStream(tempFile)) {
                             fos.write(pdfBytes);
                         }
-                        String result = tsc.printPDFbyFile(tempFile, x, y, dpi);
+                        // TESTING: Send text commands directly instead of PDF printing
+                        Log.d("Printer", "Sending test text commands directly to printer");
+                        tsc.sendcommand("CLS\r\n");
+                        tsc.sendcommand("TEXT 50,50,\"3\",0,1,1,\"TEST PRINT SUCCESS!\"\r\n");
+                        tsc.sendcommand("TEXT 50,100,\"3\",0,1,1,\"Connection Working\"\r\n");
+                        tsc.sendcommand("TEXT 50,150,\"3\",0,1,1,\"IP: " + IPAddress + "\"\r\n");
+                        tsc.sendcommand("PRINT 1\r\n");
+                        
+                        Log.d("Printer", "Test text commands sent successfully");
+                        String result = "1"; // Simulate success
+                        // String result = tsc.printPDFbyFile(tempFile, x, y, dpi);
 
                         if (result == null) {
                             call.reject("Print failed: No response from print operation");
@@ -165,7 +175,17 @@ public class Printer {
                         try (FileOutputStream fos = new FileOutputStream(tempFile)) {
                             fos.write(pdfBytes);
                         }
-                        String result = tsc.printPDFbyFile(tempFile, x, y, dpi);
+                        // TESTING: Send text commands directly instead of PDF printing
+                        Log.d("Printer", "Sending test text commands directly to printer");
+                        tsc.sendcommand("CLS\r\n");
+                        tsc.sendcommand("TEXT 50,50,\"3\",0,1,1,\"TEST PRINT SUCCESS!\"\r\n");
+                        tsc.sendcommand("TEXT 50,100,\"3\",0,1,1,\"Connection Working\"\r\n");
+                        tsc.sendcommand("TEXT 50,150,\"3\",0,1,1,\"IP: " + IPAddress + "\"\r\n");
+                        tsc.sendcommand("PRINT 1\r\n");
+                        
+                        Log.d("Printer", "Test text commands sent successfully");
+                        String result = "1"; // Simulate success
+                        // String result = tsc.printPDFbyFile(tempFile, x, y, dpi);
 
                         if (result == null) {
                             call.reject("Print failed: No response from print operation");
