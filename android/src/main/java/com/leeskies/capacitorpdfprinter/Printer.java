@@ -77,8 +77,6 @@ public class Printer {
                     connectionOpened = true;
                     Log.d("Printer", "Successfully connected to printer");
 
-                    // Commented out for testing - using hardcoded test data
-                    /*
                     if (base64String == null || base64String.isEmpty()) {
                         call.reject("Print failed: No PDF data provided (base64String is empty)");
                         return;
@@ -93,13 +91,6 @@ public class Printer {
                         call.reject("Print failed: Invalid base64 PDF data - " + e.getMessage());
                         return;
                     }
-                    */
-                    
-                    // HARDCODED TEST DATA
-                    Log.d("Printer", "Using hardcoded test data instead of PDF");
-                    String testData = "TEST PRINT - Connection and printer communication test";
-                    byte[] pdfBytes = testData.getBytes();
-                    Log.d("Printer", "Test data: " + pdfBytes.length + " bytes");
                     File tempFile = null;
                     try {
                         tempFile = File.createTempFile("tempPDF", ".pdf");
@@ -167,14 +158,7 @@ public class Printer {
                     int shift = 0;
                     tsc.setup(width, height, speed, density, sensor, gap, shift);
 
-                    // Commented out for testing - using hardcoded test data
-                    // byte[] pdfBytes = Base64.decode(base64String, Base64.DEFAULT);
-                    
-                    // HARDCODED TEST DATA
-                    Log.d("Printer", "Using hardcoded test data instead of PDF");
-                    String testData = "TEST PRINT - Connection and printer communication test";
-                    byte[] pdfBytes = testData.getBytes();
-                    Log.d("Printer", "Test data: " + pdfBytes.length + " bytes");
+                    byte[] pdfBytes = Base64.decode(base64String, Base64.DEFAULT);
                     File tempFile = null;
                     try {
                         tempFile = File.createTempFile("tempPDF", ".pdf");
