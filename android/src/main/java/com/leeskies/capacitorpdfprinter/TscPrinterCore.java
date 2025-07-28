@@ -171,62 +171,49 @@ public class TscPrinterCore {
     }
 
     public String printPDFbyFile(File file, int x_coordinates, int y_coordinates, int printer_dpi) {
-    try {
-      PdfRenderer mPdfRenderer = new PdfRenderer(ParcelFileDescriptor.open(file, 268435456));
-      int PageCount = mPdfRenderer.getPageCount();
-      for (int idx = 0; idx < PageCount; idx++) {
-        PdfRenderer.Page page = mPdfRenderer.openPage(idx);
-        int width = page.getWidth() * printer_dpi / 72;
-        int height = page.getHeight() * printer_dpi / 72;
-        Bitmap bitmap = Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888);
-        Canvas canvas = new Canvas(bitmap);
-        canvas.drawColor(-1);
-        page.render(bitmap, new Rect(0, 0, width, height), null, 1);
-        page.close();
-        sendcommand("CLS\r\n");
-        sendbitmap(x_coordinates, y_coordinates, bitmap);
-        sendcommand("PRINT 1\r\n");
-        bitmap.recycle();
-      } 
-      mPdfRenderer.close();
-    } catch (Exception ex) {
-      ex.printStackTrace();
-      return "-1";
-    } 
-    return "1";
-  }
-
-    private void sendBitmapManually(int x_coordinates, int y_coordinates, Bitmap bitmap) {
-        Bitmap gray_bitmap = bitmap2Gray(bitmap);
-        Bitmap binary_bitmap = gray2Binary(gray_bitmap, 128);
-        String picture_width = Integer.toString((binary_bitmap.getWidth() + 7) / 8);
-        String picture_height = Integer.toString(binary_bitmap.getHeight());
-        String command = "BITMAP " + x_coordinates + "," + y_coordinates + "," + picture_width + "," + picture_height + ",0,";
-        byte[] stream = new byte[(binary_bitmap.getWidth() + 7) / 8 * binary_bitmap.getHeight()];
-        int Width_bytes = (binary_bitmap.getWidth() + 7) / 8;
-        int Width = binary_bitmap.getWidth();
-        int Height = binary_bitmap.getHeight();
-        for (int i = 0; i < Height * Width_bytes; i++)
-            stream[i] = -1;
-        for (int y = 0; y < Height; y++) {
-            for (int x = 0; x < Width; x++) {
-                int pixelColor = binary_bitmap.getPixel(x, y);
-                int colorR = Color.red(pixelColor);
-                int colorG = Color.green(pixelColor);
-                int colorB = Color.blue(pixelColor);
-                int total = (colorR + colorG + colorB) / 3;
-                if (total == 0)
-                    stream[y * (Width + 7) / 8 + x / 8] = (byte)(stream[y * (Width + 7) / 8 + x / 8] ^ (byte)(128 >> x % 8));
+        try {
+            PdfRenderer mPdfRenderer = new PdfRenderer(ParcelFileDescriptor.open(file, 268435456));
+            int PageCount = mPdfRenderer.getPageCount();
+            for (int idx = 0; idx < PageCount; idx++) {
+                PdfRenderer.Page page = mPdfRenderer.openPage(idx);
+                int width = page.getWidth() * printer_dpi / 72;
+                int height = page.getHeight() * printer_dpi / 72;
+                Bitmap bitmap = Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888);
+                Canvas canvas = new Canvas(bitmap);
+                canvas.drawColor(-1);
+                // Remove this problematic line: canvas.drawBitmap(bitmap, 0.0F, 0.0F, null);
+                page.render(bitmap, new Rect(0, 0, width, height), null, 1);
+                
+                // Save bitmap as PNG for debugging
+                saveBitmapAsPNG(bitmap, "debug_page_" + idx + ".png");
+                
+                page.close();
+                sendcommand("CLS\r\n");
+                sendbitmap(x_coordinates, y_coordinates, bitmap);
+                sendcommand("PRINT 1\r\n");
+                bitmap.recycle();
             }
+            mPdfRenderer.close();
+        } catch (Exception ex) {
+            ex.printStackTrace();
+            return "-1";
         }
-        sendcommand(command);
-        sendcommand(stream);
-        sendcommand("\r\n");
-        if (gray_bitmap != null && !gray_bitmap.isRecycled()) {
-            gray_bitmap.recycle();
-        }
-        if (binary_bitmap != null && !binary_bitmap.isRecycled()) {
-            binary_bitmap.recycle();
+        return "1";
+    }
+
+    private void saveBitmapAsPNG(Bitmap bitmap, String filename) {
+        try {
+            // Save to app's external files directory (doesn't require WRITE_EXTERNAL_STORAGE permission)
+            File file = new File(getExternalFilesDir(Environment.DIRECTORY_PICTURES), filename);
+            
+            FileOutputStream fos = new FileOutputStream(file);
+            bitmap.compress(Bitmap.CompressFormat.PNG, 100, fos);
+            fos.flush();
+            fos.close();
+            
+            Log.d("DEBUG", "Bitmap saved to: " + file.getAbsolutePath());
+        } catch (Exception e) {
+            Log.e("DEBUG", "Error saving bitmap: " + e.getMessage());
         }
     }
 
