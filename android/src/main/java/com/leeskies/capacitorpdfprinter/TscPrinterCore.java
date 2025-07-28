@@ -181,7 +181,6 @@ public class TscPrinterCore {
         Bitmap bitmap = Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888);
         Canvas canvas = new Canvas(bitmap);
         canvas.drawColor(-1);
-        canvas.drawBitmap(bitmap, 0.0F, 0.0F, null);
         page.render(bitmap, new Rect(0, 0, width, height), null, 1);
         page.close();
         sendcommand("CLS\r\n");
