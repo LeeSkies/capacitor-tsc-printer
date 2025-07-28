@@ -171,36 +171,53 @@ public class TscPrinterCore {
     }
 
     public String printPDFbyFile(File file, int x_coordinates, int y_coordinates, int printer_dpi) {
-        if (file == null || !file.exists()) {
-            return "-1";
-        }
-        try {
-            PdfRenderer mPdfRenderer = new PdfRenderer(ParcelFileDescriptor.open(file, ParcelFileDescriptor.MODE_READ_ONLY));
-            int PageCount = mPdfRenderer.getPageCount();
-            for (int idx = 0; idx < PageCount; idx++) {
-                PdfRenderer.Page page = mPdfRenderer.openPage(idx);
-                int width = page.getWidth() * printer_dpi / 72;
-                int height = page.getHeight() * printer_dpi / 72;
-                Bitmap bitmap = Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888);
-                Canvas canvas = new Canvas(bitmap);
-                canvas.drawColor(-1);
-                // canvas.drawBitmap(bitmap, 0.0F, 0.0F, null);
-                page.render(bitmap, null, null, 1);
-                page.close();
-                sendcommand("CLS\r\n");
-                sendbitmap(x_coordinates, y_coordinates, bitmap);
-                sendcommand("PRINT 1\r\n");
-                if (bitmap != null && !bitmap.isRecycled()) {
-                    bitmap.recycle();
-                }
-            }
-            mPdfRenderer.close();
-        } catch (Exception ex) {
-            ex.printStackTrace();
-            return "-1";
-        }
-        return "1";
+    if (file == null || !file.exists()) {
+        return "-1";
     }
+    try {
+        PdfRenderer mPdfRenderer = new PdfRenderer(ParcelFileDescriptor.open(file, ParcelFileDescriptor.MODE_READ_ONLY));
+        int PageCount = mPdfRenderer.getPageCount();
+        for (int idx = 0; idx < PageCount; idx++) {
+            PdfRenderer.Page page = mPdfRenderer.openPage(idx);
+            int width = (int)((page.getWidth() * printer_dpi) / 72.0D);
+            int height = (int)((page.getHeight() * printer_dpi) / 72.0D);
+            Bitmap bitmap = Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888);
+            page.render(bitmap, null, null, 1);
+            page.close();
+            sendcommand("CLS\r\n");
+            sendBitmapManually(x_coordinates, y_coordinates, bitmap);
+            sendcommand("PRINT 1\r\n");
+            if (bitmap != null && !bitmap.isRecycled()) {
+                bitmap.recycle();
+            }
+        }
+        mPdfRenderer.close();
+    } catch (Exception ex) {
+        ex.printStackTrace();
+        return "-1";
+    }
+    return "1";
+}
+
+private void sendBitmapManually(int x_coordinates, int y_coordinates, Bitmap bitmap) {
+    Bitmap gray_bitmap = bitmap2Gray(bitmap);
+    Bitmap binary_bitmap = gray2Binary(gray_bitmap);
+    String picture_width = Integer.toString((binary_bitmap.getWidth() + 7) / 8);
+    String picture_height = Integer.toString(binary_bitmap.getHeight());
+    String command = "BITMAP " + x_coordinates + "," + y_coordinates + "," + picture_width + "," + picture_height + ",0,";
+    byte[] stream = new byte[(binary_bitmap.getWidth() + 7) / 8 * binary_bitmap.getHeight()];
+    int Width_bytes = (binary_bitmap.getWidth() + 7) / 8;
+    int Width = binary_bitmap.getWidth();
+    int Height = binary_bitmap.getHeight();
+    for (int i = 0; i < Height * Width_bytes; i++)
+        stream[i] = -1;
+    for (int y = 0; y < Height; y++) {
+        for (int x = 0; x < Width; x++) {
+            int pixelColor = binary_bitmap.getPixel(x, y);
+            int colorR = Color.red(pixelColor);
+            int colorG = Color.green(pixelColor);
+            int colorB = Color.blue(pixelColor);
+            int total = (colorR + col
 
     private void sendbitmap(int x_coordinates, int y_coordinates, Bitmap original_bitmap) {
         sendbitmap(x_coordinates, y_coordinates, original_bitmap, 128);
