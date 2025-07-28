@@ -97,17 +97,11 @@ public class Printer {
                         try (FileOutputStream fos = new FileOutputStream(tempFile)) {
                             fos.write(pdfBytes);
                         }
-                        // TESTING: Send text commands directly instead of PDF printing
-                        Log.d("Printer", "Sending test text commands directly to printer");
-                        tsc.sendcommand("CLS\r\n");
-                        tsc.sendcommand("TEXT 50,50,\"3\",0,1,1,\"TEST PRINT SUCCESS!\"\r\n");
-                        tsc.sendcommand("TEXT 50,100,\"3\",0,1,1,\"Connection Working\"\r\n");
-                        tsc.sendcommand("TEXT 50,150,\"3\",0,1,1,\"IP: " + IPAddress + "\"\r\n");
-                        tsc.sendcommand("PRINT 1\r\n");
+                        Log.d("Printer", "Created temp PDF file: " + tempFile.getAbsolutePath() + " (" + tempFile.length() + " bytes)");
                         
-                        Log.d("Printer", "Test text commands sent successfully");
-                        String result = "1"; // Simulate success
-                        // String result = tsc.printPDFbyFile(tempFile, x, y, dpi);
+                        Log.d("Printer", "Starting print operation with params: x=" + x + ", y=" + y + ", dpi=" + dpi);
+                        String result = tsc.printPDFbyFile(tempFile, x, y, dpi);
+                        Log.d("Printer", "Print operation result: " + result);
 
                         if (result == null) {
                             call.reject("Print failed: No response from print operation");
@@ -168,24 +162,31 @@ public class Printer {
                     int shift = 0;
                     tsc.setup(width, height, speed, density, sensor, gap, shift);
 
-                    byte[] pdfBytes = Base64.decode(base64String, Base64.DEFAULT);
+                    if (base64String == null || base64String.isEmpty()) {
+                        call.reject("Print failed: No PDF data provided (base64String is empty)");
+                        return;
+                    }
+                    
+                    Log.d("Printer", "Decoding PDF data (" + base64String.length() + " characters)");
+                    byte[] pdfBytes;
+                    try {
+                        pdfBytes = Base64.decode(base64String, Base64.DEFAULT);
+                        Log.d("Printer", "Decoded PDF: " + pdfBytes.length + " bytes");
+                    } catch (IllegalArgumentException e) {
+                        call.reject("Print failed: Invalid base64 PDF data - " + e.getMessage());
+                        return;
+                    }
                     File tempFile = null;
                     try {
                         tempFile = File.createTempFile("tempPDF", ".pdf");
                         try (FileOutputStream fos = new FileOutputStream(tempFile)) {
                             fos.write(pdfBytes);
                         }
-                        // TESTING: Send text commands directly instead of PDF printing
-                        Log.d("Printer", "Sending test text commands directly to printer");
-                        tsc.sendcommand("CLS\r\n");
-                        tsc.sendcommand("TEXT 50,50,\"3\",0,1,1,\"TEST PRINT SUCCESS!\"\r\n");
-                        tsc.sendcommand("TEXT 50,100,\"3\",0,1,1,\"Connection Working\"\r\n");
-                        tsc.sendcommand("TEXT 50,150,\"3\",0,1,1,\"IP: " + IPAddress + "\"\r\n");
-                        tsc.sendcommand("PRINT 1\r\n");
+                        Log.d("Printer", "Created temp PDF file: " + tempFile.getAbsolutePath() + " (" + tempFile.length() + " bytes)");
                         
-                        Log.d("Printer", "Test text commands sent successfully");
-                        String result = "1"; // Simulate success
-                        // String result = tsc.printPDFbyFile(tempFile, x, y, dpi);
+                        Log.d("Printer", "Starting print operation with params: x=" + x + ", y=" + y + ", dpi=" + dpi);
+                        String result = tsc.printPDFbyFile(tempFile, x, y, dpi);
+                        Log.d("Printer", "Print operation result: " + result);
 
                         if (result == null) {
                             call.reject("Print failed: No response from print operation");
