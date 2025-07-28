@@ -185,7 +185,7 @@ public class TscPrinterCore {
                 Canvas canvas = new Canvas(bitmap);
                 canvas.drawColor(-1);
                 canvas.drawBitmap(bitmap, 0.0F, 0.0F, null);
-                page.render(bitmap, new Rect(0, 0, width, height), null, PdfRenderer.Page.RENDER_MODE_FOR_PRINT);
+                page.render(bitmap, new Rect(0, 0, width, height), null, 1);
                 page.close();
                 sendcommand("CLS\r\n");
                 sendbitmap(x_coordinates, y_coordinates, bitmap);
