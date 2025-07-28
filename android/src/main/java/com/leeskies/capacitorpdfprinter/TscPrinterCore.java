@@ -171,33 +171,31 @@ public class TscPrinterCore {
     }
 
     public String printPDFbyFile(File file, int x_coordinates, int y_coordinates, int printer_dpi) {
-        if (file == null || !file.exists()) {
-            return "-1";
-        }
-        try {
-            PdfRenderer mPdfRenderer = new PdfRenderer(ParcelFileDescriptor.open(file, ParcelFileDescriptor.MODE_READ_ONLY));
-            int PageCount = mPdfRenderer.getPageCount();
-            for (int idx = 0; idx < PageCount; idx++) {
-                PdfRenderer.Page page = mPdfRenderer.openPage(idx);
-                int width = (int)((page.getWidth() * printer_dpi) / 72.0D);
-                int height = (int)((page.getHeight() * printer_dpi) / 72.0D);
-                Bitmap bitmap = Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888);
-                page.render(bitmap, new Rect(0, 0, width, height), null, 1);
-                page.close();
-                sendcommand("CLS\r\n");
-                sendBitmapManually(x_coordinates, y_coordinates, bitmap);
-                sendcommand("PRINT 1\r\n");
-                if (bitmap != null && !bitmap.isRecycled()) {
-                    bitmap.recycle();
-                }
-            }
-            mPdfRenderer.close();
-        } catch (Exception ex) {
-            ex.printStackTrace();
-            return "-1";
-        }
-        return "1";
-    }
+    try {
+      PdfRenderer mPdfRenderer = new PdfRenderer(ParcelFileDescriptor.open(file, 268435456));
+      int PageCount = mPdfRenderer.getPageCount();
+      for (int idx = 0; idx < PageCount; idx++) {
+        PdfRenderer.Page page = mPdfRenderer.openPage(idx);
+        int width = page.getWidth() * printer_dpi / 72;
+        int height = page.getHeight() * printer_dpi / 72;
+        Bitmap bitmap = Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888);
+        Canvas canvas = new Canvas(bitmap);
+        canvas.drawColor(-1);
+        canvas.drawBitmap(bitmap, 0.0F, 0.0F, null);
+        page.render(bitmap, new Rect(0, 0, width, height), null, 1);
+        page.close();
+        sendcommand("CLS\r\n");
+        sendbitmap(x_coordinates, y_coordinates, bitmap);
+        sendcommand("PRINT 1\r\n");
+        bitmap.recycle();
+      } 
+      mPdfRenderer.close();
+    } catch (Exception ex) {
+      ex.printStackTrace();
+      return "-1";
+    } 
+    return "1";
+  }
 
     private void sendBitmapManually(int x_coordinates, int y_coordinates, Bitmap bitmap) {
         Bitmap gray_bitmap = bitmap2Gray(bitmap);
