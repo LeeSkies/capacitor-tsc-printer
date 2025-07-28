@@ -53,14 +53,44 @@ public class Printer {
                 TscPrinterCore tsc = new TscPrinterCore();
                 boolean connectionOpened = false;
                 try {
+                    Log.d("Printer", "Attempting to connect to printer at " + IPAddress + ":" + port);
                     String openResult = tsc.openport(IPAddress, port);
-                    if (openResult == null || openResult.equals("-1") || openResult.toLowerCase().contains("error") || openResult.toLowerCase().contains("failed")) {
-                        call.reject("Failed to connect to printer at " + IPAddress + ":" + port + " - " + openResult);
+                    Log.d("Printer", "Connection result: " + openResult);
+                    
+                    if (openResult == null) {
+                        call.reject("Connection failed: No response from printer at " + IPAddress + ":" + port);
                         return;
                     }
+                    if (openResult.equals("-1")) {
+                        call.reject("Connection failed: Cannot reach printer at " + IPAddress + ":" + port + " (timeout or network error)");
+                        return;
+                    }
+                    if (openResult.equals("-2")) {
+                        call.reject("Connection failed: Socket error when connecting to " + IPAddress + ":" + port);
+                        return;
+                    }
+                    if (openResult.toLowerCase().contains("error") || openResult.toLowerCase().contains("failed")) {
+                        call.reject("Connection failed: " + openResult + " at " + IPAddress + ":" + port);
+                        return;
+                    }
+                    
                     connectionOpened = true;
+                    Log.d("Printer", "Successfully connected to printer");
 
-                    byte[] pdfBytes = Base64.decode(base64String, Base64.DEFAULT);
+                    if (base64String == null || base64String.isEmpty()) {
+                        call.reject("Print failed: No PDF data provided (base64String is empty)");
+                        return;
+                    }
+                    
+                    Log.d("Printer", "Decoding PDF data (" + base64String.length() + " characters)");
+                    byte[] pdfBytes;
+                    try {
+                        pdfBytes = Base64.decode(base64String, Base64.DEFAULT);
+                        Log.d("Printer", "Decoded PDF: " + pdfBytes.length + " bytes");
+                    } catch (IllegalArgumentException e) {
+                        call.reject("Print failed: Invalid base64 PDF data - " + e.getMessage());
+                        return;
+                    }
                     File tempFile = null;
                     try {
                         tempFile = File.createTempFile("tempPDF", ".pdf");
@@ -69,11 +99,16 @@ public class Printer {
                         }
                         String result = tsc.printPDFbyFile(tempFile, x, y, dpi);
 
-                        if (result.equals("-1")) {
-                            call.reject("Print operation failed");
+                        if (result == null) {
+                            call.reject("Print failed: No response from print operation");
                             return;
                         }
-                        Log.d("Printer", "Print result: " + result);
+                        if (result.equals("-1")) {
+                            call.reject("Print failed: Print operation returned error (-1)");
+                            return;
+                        }
+                        
+                        Log.d("Printer", "Print completed successfully: " + result);
                         call.resolve();
                     } catch (Exception e) {
                         e.printStackTrace();
@@ -132,11 +167,16 @@ public class Printer {
                         }
                         String result = tsc.printPDFbyFile(tempFile, x, y, dpi);
 
-                        if (result.equals("-1")) {
-                            call.reject("Print operation failed");
+                        if (result == null) {
+                            call.reject("Print failed: No response from print operation");
                             return;
                         }
-                        Log.d("Printer", "Print result: " + result);
+                        if (result.equals("-1")) {
+                            call.reject("Print failed: Print operation returned error (-1)");
+                            return;
+                        }
+                        
+                        Log.d("Printer", "Print completed successfully: " + result);
                         call.resolve();
                     } catch (Exception e) {
                         e.printStackTrace();

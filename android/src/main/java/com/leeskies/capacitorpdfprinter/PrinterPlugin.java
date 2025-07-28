@@ -62,7 +62,6 @@ public class PrinterPlugin extends Plugin {
                 return;
             }
             implementation.printPdf(port, IPAddress, base64String, x, y, dpi, call);
-            call.resolve();
         } catch (Exception e) {
             call.reject(e.getMessage());
         }
@@ -84,7 +83,6 @@ public class PrinterPlugin extends Plugin {
                 return;
             }
             implementation.printPdf(port, IPAddress, base64String, x, y, width, height, dpi, call);
-            call.resolve();
         } catch (Exception e) {
             call.reject(e.getMessage());
         }
