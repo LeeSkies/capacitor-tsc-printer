@@ -40,7 +40,6 @@ public class TscPrinterCore {
                 .detectLeakedSqlLiteObjects()
                 .detectLeakedClosableObjects()
                 .penaltyLog()
-                .penaltyDeath()
                 .build());
 
         try {
@@ -50,15 +49,24 @@ public class TscPrinterCore {
             this.outputStream = this.socket.getOutputStream();
             this.isConnected = true;
         } catch (Exception ex) {
+            this.isConnected = false;
             try {
+                if (this.inputStream != null) {
+                    this.inputStream.close();
+                }
+                if (this.outputStream != null) {
+                    this.outputStream.close();
+                }
                 if (this.socket != null) {
                     this.socket.close();
                 }
             } catch (IOException e) {
-                this.isConnected = false;
                 return "-2";
+            } finally {
+                this.inputStream = null;
+                this.outputStream = null;
+                this.socket = null;
             }
-            this.isConnected = false;
             return "-1";
         }
 
@@ -79,10 +87,23 @@ public class TscPrinterCore {
         if (!this.isConnected)
             return "-1";
         try {
-            this.socket.close();
+            if (this.inputStream != null) {
+                this.inputStream.close();
+            }
+            if (this.outputStream != null) {
+                this.outputStream.close();
+            }
+            if (this.socket != null) {
+                this.socket.close();
+            }
             this.isConnected = false;
         } catch (IOException e) {
+            this.isConnected = false;
             return "-1";
+        } finally {
+            this.inputStream = null;
+            this.outputStream = null;
+            this.socket = null;
         }
         try {
             Thread.sleep(100L);
@@ -150,6 +171,9 @@ public class TscPrinterCore {
     }
 
     public String printPDFbyFile(File file, int x_coordinates, int y_coordinates, int printer_dpi) {
+        if (file == null || !file.exists()) {
+            return "-1";
+        }
         try {
             PdfRenderer mPdfRenderer = new PdfRenderer(ParcelFileDescriptor.open(file, ParcelFileDescriptor.MODE_READ_ONLY));
             int PageCount = mPdfRenderer.getPageCount();
@@ -166,7 +190,9 @@ public class TscPrinterCore {
                 sendcommand("CLS\r\n");
                 sendbitmap(x_coordinates, y_coordinates, bitmap);
                 sendcommand("PRINT 1\r\n");
-                bitmap.recycle();
+                if (bitmap != null && !bitmap.isRecycled()) {
+                    bitmap.recycle();
+                }
             }
             mPdfRenderer.close();
         } catch (Exception ex) {
@@ -197,8 +223,9 @@ public class TscPrinterCore {
         } catch (NoSuchFieldException e) {
             e.printStackTrace();
         }
-        gray_bitmap = bitmap2Gray(original_bitmap);
-        binary_bitmap = gray2Binary(gray_bitmap, threshold);
+        try {
+            gray_bitmap = bitmap2Gray(original_bitmap);
+            binary_bitmap = gray2Binary(gray_bitmap, threshold);
         String x_axis = Integer.toString(x_coordinates);
         String y_axis = Integer.toString(y_coordinates);
         String picture_wdith = Integer.toString((binary_bitmap.getWidth() + 7) / 8);
@@ -232,6 +259,14 @@ public class TscPrinterCore {
         sendcommand(out.toByteArray());
         header = null;
         encoded_data = null;
+        } finally {
+            if (gray_bitmap != null && !gray_bitmap.isRecycled()) {
+                gray_bitmap.recycle();
+            }
+            if (binary_bitmap != null && !binary_bitmap.isRecycled()) {
+                binary_bitmap.recycle();
+            }
+        }
     }
 
     private Bitmap bitmap2Gray(Bitmap bmSrc) {
