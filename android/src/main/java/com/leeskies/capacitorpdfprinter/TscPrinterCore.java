@@ -12,9 +12,12 @@ import android.graphics.Rect;
 import android.graphics.pdf.PdfRenderer;
 import android.os.ParcelFileDescriptor;
 import android.os.StrictMode;
+import android.os.Environment;
+import android.util.Log;
 
 import java.io.ByteArrayOutputStream;
 import java.io.File;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
@@ -170,27 +173,44 @@ public class TscPrinterCore {
         return "1";
     }
 
+    // Original method for backward compatibility
     public String printPDFbyFile(File file, int x_coordinates, int y_coordinates, int printer_dpi) {
+        return printPDFbyFile(file, x_coordinates, y_coordinates, printer_dpi, false);
+    }
+
+    // Modified method with debug parameter
+    public String printPDFbyFile(File file, int x_coordinates, int y_coordinates, int printer_dpi, boolean debugMode) {
         try {
             PdfRenderer mPdfRenderer = new PdfRenderer(ParcelFileDescriptor.open(file, 268435456));
             int PageCount = mPdfRenderer.getPageCount();
             for (int idx = 0; idx < PageCount; idx++) {
                 PdfRenderer.Page page = mPdfRenderer.openPage(idx);
-                int width = page.getWidth() * printer_dpi / 72;
-                int height = page.getHeight() * printer_dpi / 72;
+                
+                // FIXED: Use working code's DPI calculation
+                int width = (int)((page.getWidth() * 72) / 25.4D);
+                int height = (int)((page.getHeight() * 72) / 25.4D);
+                
                 Bitmap bitmap = Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888);
-                Canvas canvas = new Canvas(bitmap);
-                canvas.drawColor(-1);
-                // Remove this problematic line: canvas.drawBitmap(bitmap, 0.0F, 0.0F, null);
-                page.render(bitmap, new Rect(0, 0, width, height), null, 1);
+                
+                // FIXED: Use working code's direct render (no Canvas setup)
+                page.render(bitmap, null, null, 1);
                 
                 // Save bitmap as PNG for debugging
                 saveBitmapAsPNG(bitmap, "debug_page_" + idx + ".png");
                 
                 page.close();
-                sendcommand("CLS\r\n");
-                sendbitmap(x_coordinates, y_coordinates, bitmap);
-                sendcommand("PRINT 1\r\n");
+                
+                if (!debugMode) {
+                    // Normal mode - send commands to printer
+                    sendcommand("CLS\r\n");
+                    sendbitmap(x_coordinates, y_coordinates, bitmap);
+                    sendcommand("PRINT 1\r\n");
+                } else {
+                    // Debug mode - just process bitmap for debug images
+                    Log.d("DEBUG", "Debug mode: Processing bitmap without sending to printer");
+                    sendbitmap(x_coordinates, y_coordinates, bitmap, 128, true); // Pass debug flag
+                }
+                
                 bitmap.recycle();
             }
             mPdfRenderer.close();
@@ -203,25 +223,32 @@ public class TscPrinterCore {
 
     private void saveBitmapAsPNG(Bitmap bitmap, String filename) {
         try {
-            // Save to app's external files directory (doesn't require WRITE_EXTERNAL_STORAGE permission)
-            File file = new File(getExternalFilesDir(Environment.DIRECTORY_PICTURES), filename);
+            // Save to Downloads folder
+            File downloadsDir = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS);
+            File file = new File(downloadsDir, filename);
             
             FileOutputStream fos = new FileOutputStream(file);
             bitmap.compress(Bitmap.CompressFormat.PNG, 100, fos);
             fos.flush();
             fos.close();
             
-            Log.d("DEBUG", "Bitmap saved to: " + file.getAbsolutePath());
+            Log.d("DEBUG", "Bitmap saved to Downloads: " + file.getAbsolutePath());
         } catch (Exception e) {
-            Log.e("DEBUG", "Error saving bitmap: " + e.getMessage());
+            Log.e("DEBUG", "Error saving bitmap to Downloads: " + e.getMessage());
         }
     }
 
+    // Original overloads for backward compatibility
     private void sendbitmap(int x_coordinates, int y_coordinates, Bitmap original_bitmap) {
-        sendbitmap(x_coordinates, y_coordinates, original_bitmap, 128);
+        sendbitmap(x_coordinates, y_coordinates, original_bitmap, 128, false);
     }
 
     private void sendbitmap(int x_coordinates, int y_coordinates, Bitmap original_bitmap, int threshold) {
+        sendbitmap(x_coordinates, y_coordinates, original_bitmap, threshold, false);
+    }
+
+    // FIXED: Modified method using uncompressed BITMAP command like working code
+    private void sendbitmap(int x_coordinates, int y_coordinates, Bitmap original_bitmap, int threshold, boolean debugMode) {
         Bitmap gray_bitmap = null;
         Bitmap binary_bitmap = null;
         BitmapFactory.Options options = new BitmapFactory.Options();
@@ -241,39 +268,53 @@ public class TscPrinterCore {
         try {
             gray_bitmap = bitmap2Gray(original_bitmap);
             binary_bitmap = gray2Binary(gray_bitmap, threshold);
-        String x_axis = Integer.toString(x_coordinates);
-        String y_axis = Integer.toString(y_coordinates);
-        String picture_wdith = Integer.toString((binary_bitmap.getWidth() + 7) / 8);
-        String picture_height = Integer.toString(binary_bitmap.getHeight());
-        String mode = Integer.toString(0);
-        byte[] stream = new byte[(binary_bitmap.getWidth() + 7) / 8 * binary_bitmap.getHeight()];
-        int Width_bytes = (binary_bitmap.getWidth() + 7) / 8;
-        int Width = binary_bitmap.getWidth();
-        int Height = binary_bitmap.getHeight();
-        for (int i = 0; i < Height * Width_bytes; i++)
-            stream[i] = -1;
-        for (int y = 0; y < Height; y++) {
-            for (int x = 0; x < Width; x++) {
-                int pixelColor = binary_bitmap.getPixel(x, y);
-                int colorR = Color.red(pixelColor);
-                int colorG = Color.green(pixelColor);
-                int colorB = Color.blue(pixelColor);
-                int total = (colorR + colorG + colorB) / 3;
-                if (total == 0)
-                    stream[y * (Width + 7) / 8 + x / 8] = (byte)(stream[y * (Width + 7) / 8 + x / 8] ^ (byte)(128 >> x % 8));
+            
+            // Save final binary bitmap before printing for debugging
+            saveBitmapAsPNG(binary_bitmap, "final_binary_" + System.currentTimeMillis() + ".png");
+            
+            if (!debugMode) {
+                // FIXED: Use uncompressed BITMAP command format like working code
+                String x_axis = Integer.toString(x_coordinates);
+                String y_axis = Integer.toString(y_coordinates);
+                String picture_width = Integer.toString((binary_bitmap.getWidth() + 7) / 8);
+                String picture_height = Integer.toString(binary_bitmap.getHeight());
+                String mode = Integer.toString(0);
+                
+                // Create BITMAP command string like working code
+                String command = "BITMAP " + x_axis + "," + y_axis + "," + picture_width + "," + picture_height + "," + mode + ",";
+                
+                byte[] stream = new byte[(binary_bitmap.getWidth() + 7) / 8 * binary_bitmap.getHeight()];
+                int Width_bytes = (binary_bitmap.getWidth() + 7) / 8;
+                int Width = binary_bitmap.getWidth();
+                int Height = binary_bitmap.getHeight();
+                
+                // Initialize stream with all 1s (white)
+                for (int i = 0; i < Height * Width_bytes; i++)
+                    stream[i] = -1;
+                
+                // Process pixels - same logic as working code
+                for (int y = 0; y < Height; y++) {
+                    for (int x = 0; x < Width; x++) {
+                        int pixelColor = binary_bitmap.getPixel(x, y);
+                        int colorR = Color.red(pixelColor);
+                        int colorG = Color.green(pixelColor);
+                        int colorB = Color.blue(pixelColor);
+                        int total = (colorR + colorG + colorB) / 3;
+                        if (total == 0)
+                            stream[y * (Width + 7) / 8 + x / 8] = (byte)(stream[y * (Width + 7) / 8 + x / 8] ^ (byte)(128 >> x % 8));
+                    }
+                }
+                
+                // FIXED: Send uncompressed data like working code
+                sendcommand(command);        // Send BITMAP command
+                sendcommand(stream);         // Send raw bitmap data
+                sendcommand("\r\n");         // Send terminator
+                
+            } else {
+                // Debug mode - just log that we're skipping printer communication
+                Log.d("DEBUG", "Debug mode: Skipping printer data transmission. Binary bitmap saved for inspection.");
             }
-        }
-        byte[] header = { 33, 83, (byte)(x_coordinates % 256), (byte)(x_coordinates / 256), (byte)(y_coordinates % 256), (byte)(y_coordinates / 256), (byte)(Width_bytes % 256), (byte)(Width_bytes / 256), (byte)(Height % 256), (byte)(Height / 256) };
-        lzss encode = new lzss();
-        byte[] encoded_data = encode.LZSSEncoding(stream, stream.length);
-        stream = null;
-        ByteArrayOutputStream out = new ByteArrayOutputStream();
-        out.write(header, 0, header.length);
-        out.write(encoded_data, 0, encoded_data.length);
-        out.write("\r\n".getBytes(), 0, 2);
-        sendcommand(out.toByteArray());
-        header = null;
-        encoded_data = null;
+            
         } finally {
             if (gray_bitmap != null && !gray_bitmap.isRecycled()) {
                 gray_bitmap.recycle();
