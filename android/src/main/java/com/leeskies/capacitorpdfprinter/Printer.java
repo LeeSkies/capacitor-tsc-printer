@@ -47,7 +47,7 @@ public class Printer {
     }
     
     public void printPdf(int port, String IPAddress, String base64String, int x, int y, int dpi, PluginCall call) {
-    printPdf(port, IPAddress, base64String, x, y, dpi, call, true);
+    printPdf(port, IPAddress, base64String, x, y, dpi, call, false);
 }
 
 public void printPdf(int port, String IPAddress, String base64String, int x, int y, int dpi, PluginCall call, boolean debug) {
