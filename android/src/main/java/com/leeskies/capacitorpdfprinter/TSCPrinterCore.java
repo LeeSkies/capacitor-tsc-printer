@@ -2838,16 +2838,16 @@ public class TSCPrinterCore {
       Log.d(TAG, "sendbitmap: Binary conversion complete");
       
       // Save binary bitmap to see what it looks like after conversion
-      try {
-        File downloadsDir = new File("/storage/emulated/0/Download");
-        File binaryFile = new File(downloadsDir, "debug_binary_" + System.currentTimeMillis() + ".png");
-        FileOutputStream fos = new FileOutputStream(binaryFile);
-        binary_bitmap.compress(Bitmap.CompressFormat.PNG, 100, fos);
-        fos.close();
-        Log.d(TAG, "sendbitmap: Saved binary bitmap to " + binaryFile.getAbsolutePath());
-      } catch (Exception e) {
-        Log.e(TAG, "sendbitmap: Failed to save binary bitmap", e);
-      }
+      // try {
+      //   File downloadsDir = new File("/storage/emulated/0/Download");
+      //   File binaryFile = new File(downloadsDir, "debug_binary_" + System.currentTimeMillis() + ".png");
+      //   FileOutputStream fos = new FileOutputStream(binaryFile);
+      //   binary_bitmap.compress(Bitmap.CompressFormat.PNG, 100, fos);
+      //   fos.close();
+      //   Log.d(TAG, "sendbitmap: Saved binary bitmap to " + binaryFile.getAbsolutePath());
+      // } catch (Exception e) {
+      //   Log.e(TAG, "sendbitmap: Failed to save binary bitmap", e);
+      // }
     } catch (Exception e) {
       Log.e(TAG, "sendbitmap: Exception during bitmap conversion", e);
       throw e;
@@ -4198,16 +4198,16 @@ public class TSCPrinterCore {
         // Use the actual PDF-rendered bitmap
         try {
           // Save actual PDF bitmap to Downloads for debugging
-          try {
-            File downloadsDir = new File("/storage/emulated/0/Download");
-            File debugFile = new File(downloadsDir, "debug_pdf_bitmap_" + System.currentTimeMillis() + ".png");
-            FileOutputStream fos = new FileOutputStream(debugFile);
-            bitmap.compress(Bitmap.CompressFormat.PNG, 100, fos);
-            fos.close();
-            Log.d(TAG, "printPDFbyFile: Saved actual PDF bitmap to " + debugFile.getAbsolutePath());
-          } catch (Exception e) {
-            Log.e(TAG, "printPDFbyFile: Failed to save PDF bitmap", e);
-          }
+          // try {
+          //   File downloadsDir = new File("/storage/emulated/0/Download");
+          //   File debugFile = new File(downloadsDir, "debug_pdf_bitmap_" + System.currentTimeMillis() + ".png");
+          //   FileOutputStream fos = new FileOutputStream(debugFile);
+          //   bitmap.compress(Bitmap.CompressFormat.PNG, 100, fos);
+          //   fos.close();
+          //   Log.d(TAG, "printPDFbyFile: Saved actual PDF bitmap to " + debugFile.getAbsolutePath());
+          // } catch (Exception e) {
+          //   Log.e(TAG, "printPDFbyFile: Failed to save PDF bitmap", e);
+          // }
           
           // Now actually send the good bitmap to printer
           Log.d(TAG, "printPDFbyFile: Sending actual PDF bitmap to printer");
