@@ -50,7 +50,7 @@ public class PrinterPlugin extends Plugin {
     //     }
     // }
     @PluginMethod
-    public void printPdf(@NonNull PluginCall call) {
+    public void printPDFByNetwork(@NonNull PluginCall call) {
         String base64String = call.getString("base64String");
         try {
             
@@ -63,10 +63,10 @@ public class PrinterPlugin extends Plugin {
                 call.reject("Please provide valid values.");
                 return;
             }
-            Log.d("PrinterPlugin", "=== CALLING PRINTER.PRINTPDF ===");
+            Log.d("PrinterPlugin", "=== CALLING PRINTER.PRINTPDFBYNETWORK ===");
             Context activityContext = this.getActivity();
             Log.d("PrinterPlugin", "Using Activity context: " + (activityContext != null ? activityContext.getClass().getSimpleName() : "null"));
-            implementation.printPdf(port, IPAddress, base64String, x, y, dpi, call, activityContext != null ? activityContext : this.getContext());
+            implementation.printPDFByNetwork(port, IPAddress, base64String, x, y, dpi, call, activityContext != null ? activityContext : this.getContext());
         } catch (Exception e) {
             call.reject(e.getMessage());
         }
