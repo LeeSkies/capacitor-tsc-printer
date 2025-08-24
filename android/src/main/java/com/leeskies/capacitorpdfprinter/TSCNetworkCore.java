@@ -513,13 +513,34 @@ public class TSCNetworkCore {
     } 
   }
 
-  // Public method for network printer discovery
+  // Public method for network printer discovery with default timeout
+  public List<PrinterInfo> discoverNetworkPrinters() {
+    return discoverNetworkPrinters(5000, false);
+  }
+
+  // Public method for network printer discovery with custom timeout
   public List<PrinterInfo> discoverNetworkPrinters(int timeoutMs) {
+    return discoverNetworkPrinters(timeoutMs, false);
+  }
+
+  // Public method for network printer discovery with timeout and return first option
+  public List<PrinterInfo> discoverNetworkPrinters(int timeoutMs, boolean returnFirst) {
+    return discoverNetworkPrinters(timeoutMs, returnFirst, null);
+  }
+
+  // Public method for network printer discovery with all options
+  public List<PrinterInfo> discoverNetworkPrinters(int timeoutMs, boolean returnFirst, String targetMacAddress) {
     long startTime = System.currentTimeMillis();
     List<PrinterInfo> discoveredPrinters = new ArrayList<>();
     
     Log.d(TAG, "=== Starting network printer discovery ===");
     Log.d(TAG, "Discovery timeout: " + timeoutMs + "ms");
+    if (returnFirst) {
+      Log.d(TAG, "Return first mode: enabled (faster discovery)");
+    }
+    if (targetMacAddress != null && !targetMacAddress.isEmpty()) {
+      Log.d(TAG, "Target MAC address mode: searching for " + targetMacAddress.toUpperCase());
+    }
     
     // Reset discovery arrays
     get_NAME = new String[100];
@@ -531,7 +552,7 @@ public class TSCNetworkCore {
     try {
       // Perform UDP broadcast discovery
       Log.d(TAG, "Initiating UDP broadcast for printer discovery");
-      broadcastDiscovery(timeoutMs);
+      broadcastDiscovery(timeoutMs, returnFirst, targetMacAddress);
       
       // Process discovered printers
       Log.d(TAG, "Processing discovery results, found " + counter + " responses");
@@ -573,7 +594,7 @@ public class TSCNetworkCore {
   }
 
   // Refactored broadcast method for discovery
-  private void broadcastDiscovery(int timeoutMs) {
+  private void broadcastDiscovery(int timeoutMs, boolean returnFirst, String targetMacAddress) {
     Log.d(TAG, "Setting up UDP broadcast discovery");
     
     byte[] buf = new byte[256];
@@ -670,6 +691,20 @@ public class TSCNetworkCore {
             
             Log.d(TAG, "Processed printer response: IP=" + discoveredIP + ", Name=" + get_NAME[counter] + ", MAC=" + get_MAC[counter]);
             counter++;
+            
+            // Check if we found the target MAC address
+            if (targetMacAddress != null && !targetMacAddress.isEmpty()) {
+              String currentMac = get_MAC[counter - 1];
+              if (currentMac != null && currentMac.equalsIgnoreCase(targetMacAddress)) {
+                Log.d(TAG, "Target MAC address found: " + currentMac + " - returning immediately");
+                break;
+              }
+            }
+            
+            if (returnFirst) {
+              Log.d(TAG, "First printer found, returning early (fast mode)");
+              break;
+            }
             
             if (counter >= 100) {
               Log.w(TAG, "Maximum printer limit reached (100), stopping discovery");

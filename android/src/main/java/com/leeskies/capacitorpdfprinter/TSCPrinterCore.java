@@ -500,8 +500,6 @@ public class TSCPrinterCore {
     out.write(header, 0, header.length);
     out.write(encoded_data, 0, encoded_data.length);
     out.write("\r\n".getBytes(), 0, 2);
-    // Note: Network sendcommand calls removed - this method now only processes bitmaps
-    // The caller needs to handle sending the compressed data to the printer
   }
   
   public static Bitmap Stucki(Bitmap src) {
