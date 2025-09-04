@@ -94,6 +94,7 @@ public class Printer {
             Log.d("Printer", "Processing PDF to extract bitmap data");
             
             try {
+                
                 // We need to manually process the PDF and send the bitmap data
                 // since printPDFbyFileSync no longer sends data automatically
                 android.graphics.pdf.PdfRenderer mPdfRenderer = new android.graphics.pdf.PdfRenderer(android.os.ParcelFileDescriptor.open(tempFile, android.os.ParcelFileDescriptor.MODE_READ_ONLY));
@@ -102,7 +103,14 @@ public class Printer {
                 
                 for (int idx = 0; idx < PageCount; idx++) {
                     Log.d("Printer", "Processing page " + (idx + 1) + "/" + PageCount);
-                    
+                  
+                    // Clear buffer before each page (like original working version)
+                    Log.d("Printer", "Clearing buffer before page " + (idx + 1));
+                    String clearResult = network.clearbuffer();
+                    if (clearResult == null || clearResult.equals("-1")) {
+                        Log.w("Printer", "Warning: Could not clear buffer for page " + (idx + 1));
+                    }
+                  
                     android.graphics.pdf.PdfRenderer.Page page = mPdfRenderer.openPage(idx);
                     int width = page.getWidth() * dpi / 72;
                     int height = page.getHeight() * dpi / 72;
@@ -263,8 +271,6 @@ public class Printer {
             Log.d("Printer", "Processing PDF to extract bitmap data for USB");
             
             try {
-                // Clear the printer buffer first
-                usb.clearbuffer();
                 
                 // Process PDF pages manually for USB printing
                 android.graphics.pdf.PdfRenderer mPdfRenderer = new android.graphics.pdf.PdfRenderer(android.os.ParcelFileDescriptor.open(tempFile, android.os.ParcelFileDescriptor.MODE_READ_ONLY));
@@ -273,7 +279,14 @@ public class Printer {
                 
                 for (int idx = 0; idx < PageCount; idx++) {
                     Log.d("Printer", "Processing USB page " + (idx + 1) + "/" + PageCount);
-                    
+                
+                    // Clear buffer before each page (like original working version)
+                    Log.d("Printer", "Clearing USB buffer before page " + (idx + 1));
+                    String clearResult = usb.clearbuffer();
+                    if (clearResult == null || clearResult.equals("-1")) {
+                        Log.w("Printer", "Warning: Could not clear USB buffer for page " + (idx + 1));
+                    }
+            
                     android.graphics.pdf.PdfRenderer.Page page = mPdfRenderer.openPage(idx);
                     int width = page.getWidth() * dpi / 72;
                     int height = page.getHeight() * dpi / 72;
