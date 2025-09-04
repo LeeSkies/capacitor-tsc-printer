@@ -614,7 +614,7 @@ public class TSCPrinterCore {
     ArrayList<Bitmap> bitmaps = new ArrayList<>();
     try {
       PdfRenderer renderer = new PdfRenderer(ParcelFileDescriptor.open(f1, 268435456));
-      int whCount = renderer.getPageCount();
+      int pageCount = renderer.getPageCount();
       int t = 0;
       if (t < pageCount) {
         PdfRenderer.Page page = renderer.openPage(t);

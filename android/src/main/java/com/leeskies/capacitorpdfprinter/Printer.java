@@ -103,13 +103,6 @@ public class Printer {
                 for (int idx = 0; idx < PageCount; idx++) {
                     Log.d("Printer", "Processing page " + (idx + 1) + "/" + PageCount);
                     
-                    // Clear printer buffer before each page (like the working version)
-                    Log.d("Printer", "Clearing printer buffer for page " + (idx + 1));
-                    String clearResult = network.clearbuffer();
-                    if (clearResult == null || clearResult.equals("-1")) {
-                        Log.w("Printer", "Warning: Could not clear printer buffer for page " + (idx + 1));
-                    }
-                    
                     android.graphics.pdf.PdfRenderer.Page page = mPdfRenderer.openPage(idx);
                     int width = page.getWidth() * dpi / 72;
                     int height = page.getHeight() * dpi / 72;
@@ -130,26 +123,23 @@ public class Printer {
                     Log.d("Printer", "Bitmap data send result: " + sendResult);
                     
                     if (sendResult == null || sendResult.equals("-1")) {
-                        call.reject("Print failed: Could not send bitmap data to printer for page " + (idx + 1));
-                        return;
-                    }
-                    
-                    // Print THIS page immediately (like the working version)
-                    Log.d("Printer", "Printing page " + (idx + 1) + " immediately");
-                    String printResult = network.sendPrintCommand();
-                    Log.d("Printer", "Page " + (idx + 1) + " print result: " + printResult);
-                    
-                    if (printResult == null || printResult.equals("-1")) {
-                        call.reject("Print failed: Could not print page " + (idx + 1));
+                        call.reject("Print failed: Could not send bitmap data to printer");
                         return;
                     }
                     
                     bitmap.recycle();
-                    Log.d("Printer", "Page " + (idx + 1) + "/" + PageCount + " completed successfully");
                 }
                 mPdfRenderer.close();
                 
-                Log.d("Printer", "All " + PageCount + " pages processed and printed successfully");
+                // Send print command to actually print
+                Log.d("Printer", "Sending print command");
+                String printResult = network.sendPrintCommand();
+                Log.d("Printer", "Print command result: " + printResult);
+                
+                if (printResult == null || printResult.equals("-1")) {
+                    call.reject("Print failed: Could not send print command to printer");
+                    return;
+                }
                 
             } catch (Exception e) {
                 Log.e("Printer", "Exception during PDF processing and printing", e);
@@ -284,13 +274,6 @@ public class Printer {
                 for (int idx = 0; idx < PageCount; idx++) {
                     Log.d("Printer", "Processing USB page " + (idx + 1) + "/" + PageCount);
                     
-                    // Clear USB printer buffer before each page (like the working version)
-                    Log.d("Printer", "Clearing USB printer buffer for page " + (idx + 1));
-                    String clearResult = usb.clearbuffer();
-                    if (clearResult == null || clearResult.equals("-1")) {
-                        Log.w("Printer", "Warning: Could not clear USB printer buffer for page " + (idx + 1));
-                    }
-                    
                     android.graphics.pdf.PdfRenderer.Page page = mPdfRenderer.openPage(idx);
                     int width = page.getWidth() * dpi / 72;
                     int height = page.getHeight() * dpi / 72;
@@ -311,26 +294,23 @@ public class Printer {
                     Log.d("Printer", "USB Bitmap data send result: " + sendResult);
                     
                     if (sendResult == null || sendResult.equals("-1")) {
-                        call.reject("USB print failed: Could not send bitmap data to printer for page " + (idx + 1));
-                        return;
-                    }
-                    
-                    // Print THIS page immediately via USB (like the working version)
-                    Log.d("Printer", "Printing USB page " + (idx + 1) + " immediately");
-                    String printResult = usb.sendPrintCommand();
-                    Log.d("Printer", "USB Page " + (idx + 1) + " print result: " + printResult);
-                    
-                    if (printResult == null || printResult.equals("-1")) {
-                        call.reject("USB print failed: Could not print page " + (idx + 1));
+                        call.reject("USB print failed: Could not send bitmap data to printer");
                         return;
                     }
                     
                     bitmap.recycle();
-                    Log.d("Printer", "USB Page " + (idx + 1) + "/" + PageCount + " completed successfully");
                 }
                 mPdfRenderer.close();
                 
-                Log.d("Printer", "All " + PageCount + " USB pages processed and printed successfully");
+                // Send print command to actually print via USB
+                Log.d("Printer", "Sending USB print command");
+                String printResult = usb.sendPrintCommand();
+                Log.d("Printer", "USB Print command result: " + printResult);
+                
+                if (printResult == null || printResult.equals("-1")) {
+                    call.reject("USB print failed: Could not send print command to printer");
+                    return;
+                }
                 
             } catch (Exception e) {
                 Log.e("Printer", "Exception during USB PDF processing and printing", e);
