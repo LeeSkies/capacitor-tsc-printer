@@ -107,9 +107,9 @@ public class Printer {
                     // Clear buffer before each page (like original working version)
                     Log.d("Printer", "Clearing buffer before page " + (idx + 1));
                     // String clearResult = network.clearbuffer();
-                    if (clearResult == null || clearResult.equals("-1")) {
-                        Log.w("Printer", "Warning: Could not clear buffer for page " + (idx + 1));
-                    }
+                    // if (clearResult == null || clearResult.equals("-1")) {
+                    //     Log.w("Printer", "Warning: Could not clear buffer for page " + (idx + 1));
+                    // }
                   
                     android.graphics.pdf.PdfRenderer.Page page = mPdfRenderer.openPage(idx);
                     int width = page.getWidth() * dpi / 72;
@@ -285,9 +285,9 @@ public class Printer {
                     // Clear buffer before each page (like original working version)
                     Log.d("Printer", "Clearing USB buffer before page " + (idx + 1));
                     // String clearResult = usb.clearbuffer();
-                    if (clearResult == null || clearResult.equals("-1")) {
-                        Log.w("Printer", "Warning: Could not clear USB buffer for page " + (idx + 1));
-                    }
+                    // if (clearResult == null || clearResult.equals("-1")) {
+                    //     Log.w("Printer", "Warning: Could not clear USB buffer for page " + (idx + 1));
+                    // }
             
                     android.graphics.pdf.PdfRenderer.Page page = mPdfRenderer.openPage(idx);
                     int width = page.getWidth() * dpi / 72;
