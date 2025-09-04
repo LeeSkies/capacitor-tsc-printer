@@ -364,7 +364,7 @@ public class TSCNetworkCore {
   public String sendPrintCommand() {
     if (this.port_connected == 0)
       return "-1"; 
-    String message = "PRINT 1,1\r\n";
+    String message = "PRINT 1\r\n";
     return sendcommand(message);
   }
 
